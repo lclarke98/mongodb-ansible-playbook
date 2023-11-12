@@ -1,0 +1,6 @@
+---
+
+- name: Create /home/ubuntu/downloads directory
+  file:
+    path: /home/ubuntu/downloads
+    state: directory

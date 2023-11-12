@@ -1,0 +1,4 @@
+- hosts: mongo
+  become: yes
+  tasks:
+    - include_tasks: ./tasks/monitoring.yml

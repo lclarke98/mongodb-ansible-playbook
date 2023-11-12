@@ -1,0 +1,51 @@
+---
+- name: Install dependencies
+  apt:
+    name:
+      - gnupg
+
+- name: Install gpg key
+  ansible.builtin.get_url:
+    url: "https://pgp.mongodb.com/server-6.0.asc"
+    dest: "/etc/apt/keyrings/mongo_6.0.asc"
+    mode: 0644
+
+- name: Get mongodb repo
+  apt_repository:
+    repo: >-
+      deb [
+       arch=amd64,arm64
+       signed-by=/etc/apt/keyrings/mongodb-server-6.0.gpg.asc ]
+      https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0
+      multiverse
+    filename: "mongodb-org-6.0"
+
+- name: create mongodb group
+  group:
+    name: mongodb
+    gid: 28
+    system: true
+
+- name: Create mongodb user
+  user:
+    name: mongodb
+    uid: 28
+    system: true
+    group: mongodb
+    comment: "MongoDB Server"
+    home: "/var/lib/mongo"
+    create_home: false
+    shell: /sbin/nologin
+  register: set_user
+
+- name: Install MongoDB
+  apt:
+    name: mongodb-org
+
+- name: Create mongodb data directory
+  file:
+    state: directory
+    path: "/var/lib/mongodb"
+    mode: 0755
+    owner: mongodb
+    group: mongodb

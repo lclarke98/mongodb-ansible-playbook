@@ -1,0 +1,80 @@
+---
+- name: Create prometheus user
+  user:
+    name: prometheus
+    uid: 28
+    system: true
+    comment: "prometheus user"
+    home: "/var/lib/prometheus"
+    create_home: false
+    shell: /sbin/nologin
+  register: set_user
+
+- name: Create /home/ubuntu/downloads directory
+  ansible.builtin.file:
+    path: /home/ubuntu/downloads
+    state: directory
+    mode: '0755'
+
+- name: Download and unzip prometheus
+  ansible.builtin.unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v2.37.6/prometheus-2.37.6.linux-amd64.tar.gz
+    dest: /home/ubuntu/downloads
+    remote_src: yes
+
+- name: Create /etc/prometheus directory
+  ansible.builtin.file:
+    path: /etc/prometheus
+    state: directory
+    mode: '0755'
+
+- name: Create /lib/prometheus directory
+  ansible.builtin.file:
+    path: /lib/prometheus
+    state: directory
+    mode: '0755'
+
+- name: Copy prometheus to /usr/local/bin
+  ansible.builtin.copy:
+    src: /home/ubuntu/downloads/prometheus-2.37.6.linux-amd64/prometheus
+    dest: /usr/bin/prometheus
+    owner: prometheus
+    remote_src: yes
+
+- name: Copy promtool to /usr/local/bin
+  ansible.builtin.copy:
+    src: /home/ubuntu/downloads/prometheus-2.37.6.linux-amd64/promtool
+    dest: /usr/bin/promtool
+    owner: prometheus
+    remote_src: yes
+
+- name: Copy prometheus.yml to /etc/prometheus
+  ansible.builtin.copy:
+    src: /home/ubuntu/downloads/prometheus-2.37.6.linux-amd64/prometheus.yml
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    remote_src: yes
+
+- name: Copy consoles/ to /etc/prometheus
+  ansible.builtin.copy:
+    src: /home/ubuntu/downloads/prometheus-2.37.6.linux-amd64/consoles/
+    dest: /etc/prometheus/consoles/
+    owner: prometheus
+    remote_src: yes
+
+- name: Copy consoles/ to /etc/prometheus
+  ansible.builtin.copy:
+    src: /home/ubuntu/downloads/prometheus-2.37.6.linux-amd64/console_libraries/
+    dest: /etc/prometheus/console_libraries/
+    owner: prometheus
+    remote_src: yes
+
+- name: Copy prometheus.serive to remote
+  ansible.builtin.copy:
+    src: ../resources/prometheus.service
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    remote_src: no
+
+# Node Exporter setup
